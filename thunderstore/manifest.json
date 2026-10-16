@@ -1,0 +1,7 @@
+{
+  "name": "WikiDumpMods",
+  "version_number": "1.0.4",
+  "website_url": "",
+  "description": "Read-only export of everything installed mods add to Valheim (items, recipes, drops, spawns, icons, translations) to JSON/PNG.",
+  "dependencies": []
+}
