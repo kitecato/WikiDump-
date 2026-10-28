@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WikiDumpMods: export Valheim mod data to JSON and PNG</title>
+<meta name="description" content="WikiDumpMods is a read-only BepInEx plugin for Valheim. It exports what your installed mods add to the game (items, recipes, creatures, drops, spawns, icons, translations) to JSON and PNG.">
+<link rel="canonical" href="https://kitecato.github.io/WikiDump-/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #eef2f1;
+  --ink: #14201f;
+  --muted: #4d5f5c;
+  --line: #c5d1ce;
+  --code-bg: #e1e9e7;
+  --accent: #1b6f60;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0f1918;
+    --ink: #dce8e5;
+    --muted: #93a8a4;
+    --line: #26393a;
+    --code-bg: #162524;
+    --accent: #62d2b9;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.wrap { max-width: 44rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+code, .mono { font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.9em; overflow-wrap: anywhere; }
+
+h1 {
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-weight: 600;
+  font-size: clamp(1.9rem, 8.5vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+  overflow-wrap: anywhere;
+}
+h2 { font-size: 1.35rem; line-height: 1.25; margin: 3rem 0 0.75rem; }
+p { margin: 0 0 1rem; }
+.lede { font-size: 1.2rem; max-width: 38rem; }
+.get { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.5rem 0 0; padding: 0; list-style: none; font-weight: 600; }
+
+ol.steps { margin: 0 0 1rem; padding-left: 1.4rem; }
+ol.steps li { margin-bottom: 0.5rem; padding-left: 0.25rem; }
+ol.steps li::marker { color: var(--muted); font-weight: 600; }
+
+pre {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--code-bg);
+  border-left: 3px solid var(--accent);
+  overflow-x: auto;
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+dl.files { margin: 0 0 1.25rem; }
+dl.files div { padding: 0.8rem 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 13rem 1fr; gap: 0.25rem 1.25rem; }
+dl.files div:last-child { border-bottom: 1px solid var(--line); }
+dl.files.cfg div { grid-template-columns: 19rem 1fr; }
+dl.files dt { font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.9rem; font-weight: 600; overflow-wrap: anywhere; }
+dl.files dd { margin: 0; }
+
+footer { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); font-size: 0.95rem; color: var(--muted); }
+footer p { margin: 0 0 0.5rem; }
+
+@media (max-width: 36rem) {
+  body { font-size: 1rem; }
+  .wrap { padding-top: 2rem; }
+  .lede { font-size: 1.1rem; }
+  dl.files div, dl.files.cfg div { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>WikiDumpMods</h1>
+  <p class="lede">A read-only BepInEx plugin for Valheim. It writes everything your installed mods add to the game into JSON and PNG files, so you can document a modpack, check balance or translate mods without reading their code.</p>
+  <ul class="get">
+    <li><a href="https://thunderstore.io/c/valheim/p/kitecato/WikiDumpMods/">Thunderstore</a></li>
+    <li><a href="https://www.nexusmods.com/valheim/mods/4481">Nexus Mods</a></li>
+    <li><a href="https://www.moddb.com/mods/wikidumpmods">ModDB</a></li>
+    <li><a href="https://github.com/kitecato/WikiDump-/releases/tag/valheim">GitHub release</a></li>
+  </ul>
+</header>
+
+<main>
+<section aria-labelledby="install-h">
+  <h2 id="install-h">Install and run</h2>
+  <ol class="steps">
+    <li>Install BepInExPack for Valheim (BepInEx 5.4.x).</li>
+    <li>Extract the <code>BepInEx</code> folder from the release zip into your Valheim folder, or install the Thunderstore package with a mod manager.</li>
+    <li>Enter any world and wait about 10 seconds.</li>
+    <li>Press <code>F11</code> in a world to dump again, for example after switching the game language.</li>
+    <li>Read the files in <code>BepInEx/config/wikidump_mods/</code>.</li>
+  </ol>
+  <p>Nothing in your world, character or other mods is changed. The plugin is client-side only, and Jotunn is optional.</p>
+</section>
+
+<section aria-labelledby="out-h">
+  <h2 id="out-h">What ends up in the folder</h2>
+  <dl class="files">
+    <div><dt>items.json</dt><dd>Modded items: names and descriptions per language, stats per quality level, recipes, how to obtain, uses, sets, tooltips.</dd></div>
+    <div><dt>pieces.json</dt><dd>Modded build pieces and stations, plus vanilla pieces that now need modded materials.</dd></div>
+    <div><dt>creatures.json</dt><dd>Modded creatures, and vanilla ones that drop or eat modded items: health, resistances, attacks, drops, spawns, taming.</dd></div>
+    <div><dt>recipes.json</dt><dd>Every recipe that makes or needs modded items or stations.</dd></div>
+    <div><dt>world.json</dt><dd>Spawns, events, locations and dungeon rooms with modded content.</dd></div>
+    <div><dt>vanilla_changes.json</dt><dd>Vanilla values your mods changed: recipes, drops, trader stock, stats.</dd></div>
+    <div><dt>origin.json</dt><dd>Which mod owns each object, and the evidence for that verdict.</dd></div>
+    <div><dt>localization/</dt><dd>Translation tables, per-mod translations with the source of each line, and missing translations.</dd></div>
+    <div><dt>icons/</dt><dd>PNG icons of items (all variants), pieces, status effects, skills and each mod's own icon.</dd></div>
+    <div><dt>mods.json, mods/</dt><dd>Per plugin: version, Thunderstore manifest, README, config entries, Harmony patches, asset bundles.</dd></div>
+  </dl>
+</section>
+
+<section aria-labelledby="own-h">
+  <h2 id="own-h">How it decides which mod added what</h2>
+  <p>An object counts as modded when one of these says so: Jotunn's mod registry, item and piece manager libraries, an asset bundle shipped with a mod (matched by object identity, not file name), or a difference from the built-in vanilla baseline. Every verdict is written to <code>origin.json</code> together with its evidence, so you can check it yourself.</p>
+  <p>Drop chances follow the game's own drop-table logic: table chance, roll count, weights and one-of-each.</p>
+</section>
+
+<section aria-labelledby="base-h">
+  <h2 id="base-h">Vanilla baseline</h2>
+  <p>The plugin ships with a snapshot of unmodded Valheim 1.0.16. After a game update you can build a fresh one: disable every mod except BepInExPack, WikiDumpMods and Jotunn, enter a world and wait for the baseline message. The new file is <code>vanilla_baseline.jsonl.gz</code>, and a local baseline takes priority over the built-in one.</p>
+</section>
+
+<section aria-labelledby="cfg-h">
+  <h2 id="cfg-h">Config</h2>
+  <p>The file is <code>BepInEx/config/ua.valheimwiki.wikidumpmods.cfg</code>. Main options and their defaults:</p>
+<dl class="files cfg">
+    <div><dt>AutoDump = true</dt><dd>Dump once per session after you enter a world.</dd></div>
+    <div><dt>Hotkey = F11</dt><dd>Press in a world to dump again.</dd></div>
+    <div><dt>DelaySeconds = 10</dt><dd>How long to wait after the player spawns, so other mods can finish registering.</dd></div>
+    <div><dt>Languages = English,Ukrainian</dt><dd>Translation tables and tooltips to export. The current game language is always included.</dd></div>
+    <div><dt>Icons = true</dt><dd>Save PNG icons of modded content.</dd></div>
+    <div><dt>IconColorMode = LinearToSRGB</dt><dd>Exact colour correction for icons. sRGB and Linear also exist; change it only if icons look wrong.</dd></div>
+    <div><dt>ScanVanillaLocations = true</dt><dd>Open vanilla locations and dungeon rooms to find modded items placed in them. Slower.</dd></div>
+    <div><dt>IncludeVanilla = false</dt><dd>Export vanilla content too, for a full game dump instead of mods only.</dd></div>
+    <div><dt>Tooltips = true</dt><dd>Export the game's own tooltip text per language.</dd></div>
+    <div><dt>RawDepth = 4</dt><dd>Nesting depth of the raw prefab dump in raw/.</dd></div>
+  </dl>
+  <p><code>IconColorMode</code> matters because Valheim runs in linear colour space. Icons saved without the conversion come out too dark.</p>
+</section>
+
+<section aria-labelledby="src-h">
+  <h2 id="src-h">Source and compatibility</h2>
+  <p>The code is on <a href="https://github.com/kitecato/WikiDump-">GitHub</a>, with a <code>build.sh</code> that compiles the plugin. It is tested on Valheim 1.0.16 with BepInEx 5.4.23.</p>
+  <p>The output has the same shape as the data behind <a href="https://valheimwiki.net/en/main">Valheim Wiki</a>, an English and Ukrainian wiki built from the game's files.</p>
+</section>
+</main>
+
+<footer>
+  <p>Unofficial tool, not affiliated with Iron Gate AB. Valheim and its game data belong to Iron Gate AB.</p>
+</footer>
+
+</div>
+</body>
+</html>
